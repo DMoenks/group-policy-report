@@ -1,0 +1,65 @@
+a { text-decoration:none }
+a:link { color:black; }
+a:visited { color:black; }
+
+.policy
+{
+    font: bold 1em Verdana;
+    text-transform: uppercase;
+    padding: 5px;
+}
+.policy > p
+{
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.policy > p > span
+{
+    padding-left:10px;
+    font-size:0.8em;
+}
+.policy > div
+{
+    background-color: lightgray;
+    padding: 5px;
+    border: 2px solid black;
+}
+.policy > div > div
+{
+    position:relative;
+}
+.comparison
+{
+    background-color:white;
+}
+.comparison > table
+{
+    table-layout:fixed;
+    text-align: left;
+    border-spacing: 5px 0px;
+    width: 100%;
+    padding: 5px;
+}
+.comparison > table > thead > tr > th
+{
+    font: normal 1em Verdana;
+    text-transform: none;
+}
+.comparison > table > tbody > tr > td
+{
+    font: normal 0.8em 'Lucida Console';
+    text-transform: none;
+    width: 50%;
+    position:relative;
+	vertical-align: top;
+}
+.comparison > table > tbody > tr > td > div
+{
+    height: 750px;
+	white-space:nowrap;
+    overflow:auto;
+}
+.comparison > table > tbody > tr > td > div > span
+{
+    font-weight: bold;
+}
