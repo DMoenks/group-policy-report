@@ -1,26 +1,33 @@
-﻿# Author: Mönks, Dominik
-# Version: 4.0
-
-# Save NewLine character for easier use
-$nl = [Environment]::NewLine
-# Save script path for easier use
-$path = Split-Path -parent $MyInvocation.MyCommand.Definition
+<#
+.SYNOPSIS
+    Short description
+.DESCRIPTION
+    Long description
+.EXAMPLE
+    PS C:\> <example usage>
+    Explanation of what the example does
+.INPUTS
+    Inputs (if any)
+.OUTPUTS
+    Output (if any)
+.NOTES
+    Author: Mönks, Dominik
+    Version: 4.1
+#>
 
 #region HTML preparations
-$XMLWriterSettings = New-Object System.Xml.XmlWriterSettings
+$XMLWriterSettings = [System.Xml.XmlWriterSettings]::new()
 $XMLWriterSettings.ConformanceLevel = [System.Xml.ConformanceLevel]::Fragment
 $XMLWriterSettings.Indent = $true
-$XMLWriter = $null
 
 function openFile([string]$Domain)
 {
-    [System.Xml.XmlWriter]::Create("$path\$Domain\GPOReport.html", $XMLWriterSettings)
+    return [System.Xml.XmlWriter]::Create("$PSScriptRoot\$Domain\GPOReport.html", $XMLWriterSettings)
 }
 
 function closeFile()
 {
     $XMLWriter.Close()
-    $XMLWriter = $null
 }
 
 function openTag([string]$Name)
@@ -52,22 +59,22 @@ foreach ($Domain in (Get-ADForest).Domains)
     {
         $policies.Add($GPO.DisplayName, @{})
         # Check if the target folder exists and, if not create it
-        if (!(Test-Path ("$path\$Domain\" + $($GPO.DisplayName.Replace(":", "")))))
+        if (!(Test-Path ("$PSScriptRoot\$Domain\" + $($GPO.DisplayName.Replace(":", "")))))
         {
-            New-Item -Path ("$path\$Domain\" + $GPO.DisplayName.Replace(":", "")) -ItemType directory
+            New-Item -Path ("$PSScriptRoot\$Domain\" + $GPO.DisplayName.Replace(":", "")) -ItemType directory
         }
         # Check if the GPO report for the most recent version already exists in the target folder and, if not, create it
-        if (!(Test-Path ("$path\$Domain\" + $GPO.DisplayName.Replace(":", "") + "\Report" + $GPO.ModificationTime.ToString("yyyyMMdd") + ".xml")))
+        if (!(Test-Path ("$PSScriptRoot\$Domain\" + $GPO.DisplayName.Replace(":", "") + "\Report" + $GPO.ModificationTime.ToString("yyyyMMdd") + ".xml")))
         {
-            Get-GPOReport -Guid $GPO.Id -ReportType Xml -Domain $Domain -Path ("$path\$Domain\" + $GPO.DisplayName.Replace(":", "") + "\Report" + $GPO.ModificationTime.ToString("yyyyMMdd") + ".xml")
+            Get-GPOReport -Guid $GPO.Id -ReportType Xml -Domain $Domain -Path ("$PSScriptRoot\$Domain\" + $GPO.DisplayName.Replace(":", "") + "\Report" + $GPO.ModificationTime.ToString("yyyyMMdd") + ".xml")
         }
         # Check if there is more than one report for the current GPO and, if so, create an entry for the domain's diff file
-        if ((Get-ChildItem -Path ("$path\$Domain\" + $GPO.DisplayName.Replace(":", "")) -Filter "*.xml").Count -gt 1)
+        if ((Get-ChildItem -Path ("$PSScriptRoot\$Domain\" + $GPO.DisplayName.Replace(":", "")) -Filter "*.xml").Count -gt 1)
         {
-            for ($i = 0;$i -lt (Get-ChildItem -Path ("$path\$Domain\" + $GPO.DisplayName.Replace(":", "")) -Filter "*.xml").Count - 1;$i++)
+            for ($i = 0;$i -lt (Get-ChildItem -Path ("$PSScriptRoot\$Domain\" + $GPO.DisplayName.Replace(":", "")) -Filter "*.xml").Count - 1;$i++)
             {
-                $CurVerFil = (Get-ChildItem -Path ("$path\$Domain\" + $GPO.DisplayName.Replace(":", "")) -Filter "*.xml" | Sort-Object -Property Name -Descending)[$i].FullName
-                $PreVerFil = (Get-ChildItem -Path ("$path\$Domain\" + $GPO.DisplayName.Replace(":", "")) -Filter "*.xml" | Sort-Object -Property Name -Descending)[$i+1].FullName
+                $CurVerFil = (Get-ChildItem -Path ("$PSScriptRoot\$Domain\" + $GPO.DisplayName.Replace(":", "")) -Filter "*.xml" | Sort-Object -Property Name -Descending)[$i].FullName
+                $PreVerFil = (Get-ChildItem -Path ("$PSScriptRoot\$Domain\" + $GPO.DisplayName.Replace(":", "")) -Filter "*.xml" | Sort-Object -Property Name -Descending)[$i+1].FullName
                 $CurVer = Get-Content $CurVerFil
                 $PreVer = Get-Content $PreVerFil
                 $CurVerDif = (Compare-Object $CurVer $PreVer | Where-Object -Property SideIndicator -EQ "<=").InputObject
@@ -105,7 +112,7 @@ foreach ($Domain in (Get-ADForest).Domains)
         }
         else
         {
-            $CurVerFil = (Get-ChildItem -Path ("$path\$Domain\" + $GPO.DisplayName.Replace(":", "")) -Filter "*.xml" | Sort-Object -Property Name -Descending)[0].FullName
+            $CurVerFil = (Get-ChildItem -Path ("$PSScriptRoot\$Domain\" + $GPO.DisplayName.Replace(":", "")) -Filter "*.xml" | Sort-Object -Property Name -Descending)[0].FullName
             $CurVer = Get-Content $CurVerFil
             $policies[$GPO.DisplayName].Add([Regex]::Match($CurVerFil, "\d{8}").Value, @{})
             $policies[$GPO.DisplayName][[Regex]::Match($CurVerFil, "\d{8}").Value].Add([Regex]::Match($CurVerFil, "\d{8}").Value, @())
