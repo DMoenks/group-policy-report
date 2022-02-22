@@ -6,13 +6,9 @@
 .EXAMPLE
     PS C:\> <example usage>
     Explanation of what the example does
-.INPUTS
-    Inputs (if any)
-.OUTPUTS
-    Output (if any)
 .NOTES
     Author: Mönks, Dominik
-    Version: 4.1
+    Version: 4.0.1
 #>
 
 #region HTML preparations
@@ -40,12 +36,12 @@ function closeTag()
     $XMLWriter.WriteEndElement()
 }
 
-function attribute([string]$Name, [string]$Value)
+function writeAttribute([string]$Name, [string]$Value)
 {
     $XMLWriter.WriteAttributeString($Name, $Value)
 }
 
-function content([string]$Value)
+function writeContent([string]$Value)
 {
     $XMLWriter.WriteString($Value)
 }
@@ -125,63 +121,63 @@ foreach ($domain in (Get-ADForest).Domains)
     $XMLWriter = openFile $domain
         openTag "head"
             openTag "link"
-                attribute "rel" "stylesheet"
-                attribute "type" "text/css"
-                attribute "href" "..\gpr.css"
+                writeAttribute "rel" "stylesheet"
+                writeAttribute "type" "text/css"
+                writeAttribute "href" "..\gpr.css"
             closeTag
             openTag "title"
-                content "GPOReports"
+                writeContent "GPOReports"
             closeTag
         closeTag
         openTag "body"
             foreach ($policy in ($policies.Keys | Sort-Object))
             {
                 openTag "div"
-                    attribute "class" "policy"
+                    writeAttribute "class" "policy"
                     openTag "p"
-                        content $policy
+                        writeContent $policy
                         openTag "span"
-                            #Hier fehlt noch das Datum der aktuellen Version
+                            #TODO: Lacking date of current version
                         closeTag
                     closeTag
                     openTag "div"
                         openTag "div"
                             openTag "select"
-                                attribute id $policy
-                                attribute size 1
+                                writeAttribute id $policy
+                                writeAttribute size 1
                                 foreach ($diff in ($policies[$policy].Keys | Sort-Object -Descending))
                                 {
                                     openTag "option"
-                                        attribute "value" "$policy.$diff"
-                                        content $diff.Replace("|", " vs. ")
+                                        writeAttribute "value" "$policy.$diff"
+                                        writeContent $diff.Replace("|", " vs. ")
                                     closeTag
                                 }
                             closeTag
                             openTag "button"
-                                attribute "onclick" "openSelected('$policy')"
-                                content "Open"
+                                writeAttribute "onclick" "openSelected('$policy')"
+                                writeContent "Open"
                             closeTag
                             openTag "button"
-                                attribute "onclick" "closeAll()"
-                                content "Close"
+                                writeAttribute "onclick" "closeAll()"
+                                writeContent "Close"
                             closeTag
                         closeTag
                         openTag "div"
                             foreach ($diff in ($policies[$policy].Keys | Sort-Object -Descending))
                             {
                                 openTag "div"
-                                    attribute "class" "comparison"
-                                    attribute "id" "$policy.$diff"
+                                    writeAttribute "class" "comparison"
+                                    writeAttribute "id" "$policy.$diff"
                                     openTag "table"
                                         if ($diff.Contains("|"))
                                         {
                                             openTag "thead"
                                                 openTag "tr"
                                                     openTag "th"
-                                                        content $diff.Split("|")[0]
+                                                        writeContent $diff.Split("|")[0]
                                                     closeTag
                                                     openTag "th"
-                                                        content $diff.Split("|")[1]
+                                                        writeContent $diff.Split("|")[1]
                                                     closeTag
                                                 closeTag
                                             closeTag
@@ -189,21 +185,21 @@ foreach ($domain in (Get-ADForest).Domains)
                                                 openTag "tr"
                                                     openTag "td"
                                                         openTag "div"
-                                                            attribute "id" "$policy.$diff.left"
-                                                            attribute "onmousedown" "unbindScroll('$policy.$diff.right')"
-                                                            attribute "onmouseup" "bindScroll('$policy.$diff.right')"
-                                                            attribute "onscroll" "scroll('$policy.$diff.left', '$policy.$diff.right')"
+                                                            writeAttribute "id" "$policy.$diff.left"
+                                                            writeAttribute "onmousedown" "unbindScroll('$policy.$diff.right')"
+                                                            writeAttribute "onmouseup" "bindScroll('$policy.$diff.right')"
+                                                            writeAttribute "onscroll" "scroll('$policy.$diff.left', '$policy.$diff.right')"
                                                             foreach ($line in $policies[$policy][$diff][$diff.Split("|")[0]])
                                                             {
                                                                 if ($line.StartsWith("1:"))
                                                                 {
                                                                     openTag "span"
-                                                                        content $line.SubString(2)
+                                                                        writeContent $line.SubString(2)
                                                                     closeTag
                                                                 }
                                                                 else
                                                                 {
-                                                                    content $line.SubString(2)
+                                                                    writeContent $line.SubString(2)
                                                                 }
                                                                 openTag "br"
                                                                 closeTag
@@ -212,21 +208,21 @@ foreach ($domain in (Get-ADForest).Domains)
                                                     closeTag
                                                     openTag "td"
                                                         openTag "div"
-                                                            attribute "id" "$policy.$diff.right"
-                                                            attribute "onmousedown" "unbindScroll('$policy.$diff.left')"
-                                                            attribute "onmouseup" "bindScroll('$policy.$diff.left')"
-                                                            attribute "onscroll" "scroll('$policy.$diff.right', '$policy.$diff.left')"
+                                                            writeAttribute "id" "$policy.$diff.right"
+                                                            writeAttribute "onmousedown" "unbindScroll('$policy.$diff.left')"
+                                                            writeAttribute "onmouseup" "bindScroll('$policy.$diff.left')"
+                                                            writeAttribute "onscroll" "scroll('$policy.$diff.right', '$policy.$diff.left')"
                                                             foreach ($line in $policies[$policy][$diff][$diff.Split("|")[1]])
                                                             {
                                                                 if ($line.StartsWith("1:"))
                                                                 {
                                                                     openTag "span"
-                                                                        content $line.SubString(2)
+                                                                        writeContent $line.SubString(2)
                                                                     closeTag
                                                                 }
                                                                 else
                                                                 {
-                                                                    content $line.SubString(2)
+                                                                    writeContent $line.SubString(2)
                                                                 }
                                                                 openTag "br"
                                                                 closeTag
@@ -241,7 +237,7 @@ foreach ($domain in (Get-ADForest).Domains)
                                             openTag "thead"
                                                 openTag "tr"
                                                     openTag "th"
-                                                        content $diff
+                                                        writeContent $diff
                                                     closeTag
                                                 closeTag
                                             closeTag
@@ -251,7 +247,7 @@ foreach ($domain in (Get-ADForest).Domains)
                                                         openTag "div"
                                                             foreach ($line in $policies[$policy][$diff][$diff])
                                                             {
-                                                                content $line.SubString(2)
+                                                                writeContent $line.SubString(2)
                                                                 openTag "br"
                                                                 closeTag
                                                             }
@@ -268,9 +264,9 @@ foreach ($domain in (Get-ADForest).Domains)
                 closeTag
             }
             openTag "script"
-                attribute "type" "text/javascript"
-                attribute "src" "..\gpr.js"
-                content ""
+                writeAttribute "type" "text/javascript"
+                writeAttribute "src" "..\gpr.js"
+                writeContent ""
             closeTag
         closeTag
     closeFile
