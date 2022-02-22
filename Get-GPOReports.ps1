@@ -120,7 +120,7 @@ foreach ($Domain in (Get-ADForest).Domains)
             openTag "link"
                 attribute "rel" "stylesheet"
                 attribute "type" "text/css"
-                attribute "href" "..\GPOReports.css"
+                attribute "href" "..\gpr.css"
             closeTag
             openTag "title"
                 content "GPOReports"
@@ -262,7 +262,7 @@ foreach ($Domain in (Get-ADForest).Domains)
             }
             openTag "script"
                 attribute "type" "text/javascript"
-                attribute "src" "..\GPOReports.js"
+                attribute "src" "..\gpr.js"
                 content ""
             closeTag
         closeTag
